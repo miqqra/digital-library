@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        logicalFilePath="migrations/migrations/1.xml">
+
+    <changeSet id="1" author="krasnikov" context="schema">
+        <preConditions>
+            <not>
+                <tableExists tableName="digital_library_rules"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="digital_library_rules">
+            <column name="id" type="bigserial"
+                    remarks="Id правила"
+                    autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="category" type="text" remarks="Категория wikidata">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="query" type="text" remarks="Запрос"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="krasnikov" context="schema">
+        <preConditions>
+            <not>
+                <tableExists tableName="book"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="book">
+            <column name="id" type="bigserial"
+                    remarks="Id книги"
+                    autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="title" type="text" remarks="Название книги">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author" type="text" remarks="Автор книги">
+                <constraints nullable="false"/>
+            </column>
+            <column name="genre" type="text" remarks="Жанр книги">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="text" remarks="Описание книги">
+                <constraints nullable="false"/>
+            </column>
+            <column name="isbn" type="text" remarks="isbn книги">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
