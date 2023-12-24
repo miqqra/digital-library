@@ -1,4 +1,4 @@
-package ru.nsu.digitallibrary.entity;
+package ru.nsu.digitallibrary.entity.postgres;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -15,7 +15,7 @@ import javax.persistence.Table;
 @Getter
 @Setter
 @Entity
-@Table(name = "book")
+@Table(name = "lib_book")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString
 public class Book {
@@ -41,4 +41,6 @@ public class Book {
     @Column(name = "isbn")
     private String isbn;
 
+    @Column(name = "file")
+    private byte[] file;
 }

@@ -21,8 +21,7 @@ public class BookController {
 
     @GetMapping("/search")
     public List<BookDto> searchBook(@RequestParam String searchQuery) {
-        return null;
-        //todo
+        return service.searchBook(searchQuery);
     }
 
     @GetMapping("/{id}/download")

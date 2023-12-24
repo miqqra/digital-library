@@ -1,4 +1,4 @@
-package ru.nsu.digitallibrary.entity;
+package ru.nsu.digitallibrary.entity.postgres;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -13,7 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "digital_library_rules")
+@Table(name = "lib_rules")
 @Getter
 @Setter
 @NoArgsConstructor

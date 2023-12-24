@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.nsu.digitallibrary.dto.rule.AddRuleDto;
 import ru.nsu.digitallibrary.dto.rule.RuleDto;
-import ru.nsu.digitallibrary.entity.SearchRule;
+import ru.nsu.digitallibrary.entity.postgres.SearchRule;
 import ru.nsu.digitallibrary.model.RuleModel;
 
 @Mapper

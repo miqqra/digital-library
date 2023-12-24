@@ -7,13 +7,13 @@
         logicalFilePath="migrations/migrations/1.xml">
 
     <changeSet id="1" author="krasnikov" context="schema">
-        <preConditions>
+        <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="digital_library_rules"/>
+                <tableExists tableName="lib_rules"/>
             </not>
         </preConditions>
 
-        <createTable tableName="digital_library_rules">
+        <createTable tableName="lib_rules">
             <column name="id" type="bigserial"
                     remarks="Id правила"
                     autoIncrement="true">
@@ -27,13 +27,13 @@
     </changeSet>
 
     <changeSet id="2" author="krasnikov" context="schema">
-        <preConditions>
+        <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="book"/>
+                <tableExists tableName="lib_book"/>
             </not>
         </preConditions>
 
-        <createTable tableName="book">
+        <createTable tableName="lib_book">
             <column name="id" type="bigserial"
                     remarks="Id книги"
                     autoIncrement="true">
@@ -54,7 +54,9 @@
             <column name="isbn" type="text" remarks="isbn книги">
                 <constraints nullable="false"/>
             </column>
+            <column name="file" type="blob" remarks="Файл"/>
         </createTable>
     </changeSet>
+
 
 </databaseChangeLog>
