@@ -14,20 +14,21 @@ import ru.nsu.digitallibrary.entity.postgres.Book;
 import ru.nsu.digitallibrary.exception.ClientException;
 import ru.nsu.digitallibrary.mapper.BookMapper;
 import ru.nsu.digitallibrary.repository.elasticsearch.BookDataElasticSearchRepository;
-import ru.nsu.digitallibrary.repository.elasticsearch.BookRepository;
+import ru.nsu.digitallibrary.repository.postgres.BookRepository;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class BookService {
+
+    private final ElasticsearchBookService elasticsearchBookService;
 
     private final BookRepository bookRepository;
     private final BookDataElasticSearchRepository bookDataElasticSearchRepository;
@@ -36,20 +37,13 @@ public class BookService {
 
     @Transactional(readOnly = true)
     public List<BookDto> searchBook(String searchQuery) {
-        try {
-            String pythonScriptPath = "C:\\Users\\User\\IdeaProjects\\digital-library\\src\\main\\resources\\script.py";
-
-            ProcessBuilder processBuilder = new ProcessBuilder("python", pythonScriptPath, searchQuery);
-            Process process = processBuilder.start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            List<String> output = List.of(reader.readLine().split(" "));
-            //todo elastic
-
-        } catch (IOException e) {
-            throw ClientException.of(HttpStatus.NOT_FOUND, "Не удалось произвести поиск");
-        }
-
-        return null;
+        return Optional.of(searchQuery)
+                .map(elasticsearchBookService::searchBook)
+                .stream()
+                .flatMap(Collection::stream)
+                .map(bookRepository::findBookById)
+                .map(mapper::toDto)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -123,6 +117,7 @@ public class BookService {
         deleteBookFile(id);
     }
 
+    @Transactional
     public void deleteBookFile(Long id) {
         bookRepository.updateBookFile(null, null, id);
     }

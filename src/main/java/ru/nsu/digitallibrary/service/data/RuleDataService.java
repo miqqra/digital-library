@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import ru.nsu.digitallibrary.mapper.RuleMapper;
 import ru.nsu.digitallibrary.model.RuleModel;
-import ru.nsu.digitallibrary.repository.RulesRepository;
+import ru.nsu.digitallibrary.repository.postgres.RulesRepository;
 
 import java.util.List;
 import java.util.Optional;

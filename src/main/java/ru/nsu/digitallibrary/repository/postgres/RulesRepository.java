@@ -1,4 +1,4 @@
-package ru.nsu.digitallibrary.repository;
+package ru.nsu.digitallibrary.repository.postgres;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

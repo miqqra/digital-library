@@ -1,3 +1,9 @@
+app:
+  words:
+    weight:
+      base: 10
+      extended: 1
+
 spring:
   security:
     user:
