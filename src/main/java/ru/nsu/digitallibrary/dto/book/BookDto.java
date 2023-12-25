@@ -19,6 +19,6 @@ public class BookDto {
 
     private String isbn;
 
-    private List<String> files; //todo прокинуть
+    private List<String> files;
 
 }
