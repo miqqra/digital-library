@@ -15,9 +15,9 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     @Modifying
     @Query("""
-update Book set file = :file where id = :id
+update Book set file = :file, fileName = :fileName where id = :id
 """)
-    void updateBookFile(byte[] file, Long id);
+    void updateBookFile(byte[] file, String fileName, Long id);
 
 
 

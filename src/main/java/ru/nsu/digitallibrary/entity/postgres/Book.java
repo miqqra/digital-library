@@ -43,4 +43,7 @@ public class Book {
 
     @Column(name = "file")
     private byte[] file;
+
+    @Column(name = "file_name")
+    private String fileName;
 }

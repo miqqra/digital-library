@@ -10,26 +10,25 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres-data:\\wsl$\docker-desktop-data\data\docker\volumes
+      - postgres-data:/var/lib/postgresql/data
     restart: always
-    networks:
-      - backend
+
   liquibase-migrations:
-    image: liquibase/liquibase:4.18
+    image: liquibase/liquibase:4.24.0
     depends_on:
       - postgres
     command:
-      - --hub-mode=off
-      - --changelog-file=src/main/resources/migrations/master.xml
-      - --driver=org.postgresql.Driver
-      - --url=jdbc:postgresql://postgresql:5432/postgres
+      #      - --changeLogFile=changelog/master.xml
+      - --changeLogFile=master.xml
+      - --url=jdbc:postgresql://postgres:5432/postgres
       - --username=postgres
       - --password=postgres
       - update
     volumes:
-      - ./migrations:/liquibase/changelog
-    networks:
-      - backend
+      - ./src/main/resources/migrations/migrations/1.xml:/liquibase/changelog/master.xml
+      - ./../../.m2/repository/org/postgresql/postgresql/42.2.18/postgresql-42.2.18.jar:/liquibase/internal/lib/postgresql-42.2.18.jar
+    working_dir: /liquibase/changelog
+
   elasticsearch:
     image: elasticsearch:7.17.13
     container_name: elasticsearch
@@ -41,6 +40,3 @@ services:
 
 volumes:
   postgres-data:
-
-networks:
-  backend: { }

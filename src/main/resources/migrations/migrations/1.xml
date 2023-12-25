@@ -55,6 +55,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="file" type="blob" remarks="Файл"/>
+            <column name="file_name" type="text" remarks="Имя файла"/>
         </createTable>
     </changeSet>
 

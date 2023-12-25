@@ -107,7 +107,7 @@ public class BookService {
         }
 
         try {
-            bookRepository.updateBookFile(file.getBytes(), bookId);
+            bookRepository.updateBookFile(file.getBytes(), file.getOriginalFilename(), bookId);
             Optional.of(file)
                     .map(this::parseBookForElastic)
                     .map(data -> mapper.toBookData(bookId, data))
@@ -124,7 +124,7 @@ public class BookService {
     }
 
     public void deleteBookFile(Long id) {
-        bookRepository.updateBookFile(null, id);
+        bookRepository.updateBookFile(null, null, id);
     }
 
     private String parseBookForElastic(MultipartFile multipartFile) {

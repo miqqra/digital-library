@@ -2,6 +2,8 @@ package ru.nsu.digitallibrary.dto.book;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class BookDto {
 
@@ -16,5 +18,7 @@ public class BookDto {
     private String description;
 
     private String isbn;
+
+    private List<String> files; //todo прокинуть
 
 }
