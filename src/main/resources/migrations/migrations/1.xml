@@ -60,4 +60,57 @@
     </changeSet>
 
 
+    <changeSet id="3" author="krasnikov" context="schema">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="authorities"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="authorities">
+            <column name="username" type="text"/>
+            <column name="authority" type="text"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="4" author="krasnikov" context="schema">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="users"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="users">
+            <column name="username" type="text"/>
+            <column name="password" type="text"/>
+            <column name="enabled" type="boolean"/>
+            <column name="priority" type="integer"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="5" author="krasnikov" context="data">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="users"/>
+        </preConditions>
+
+        <insert tableName="users">
+            <column name="username" value="chucha"/>
+            <column name="password"
+                    value="$2a$10$yeIfjMVthiFFjmCud2TbC.yvxvUdsZZB59rVaqAhOnC5ttxInQHaa"/> <!--chucha-->
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="6" author="krasnikov" context="data">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="authorities"/>
+        </preConditions>
+
+        <insert tableName="authorities">
+            <column name="username" value="chucha"/>
+            <column name="authority" value="ADMIN"/>
+        </insert>
+    </changeSet>
+
+
 </databaseChangeLog>
