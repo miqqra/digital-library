@@ -12,6 +12,8 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 @Configuration
@@ -33,6 +35,7 @@ public class SecurityConfig {
                                 .antMatchers("/admin").hasAuthority("ADMIN")
                                 .antMatchers("/api").permitAll()
                 )
+                .addFilter(filter())
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(Customizer.withDefaults());
         return http.build();
@@ -46,5 +49,18 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public Filter filter() {
+        return (servletRequest, servletResponse, filterChain) -> {
+            HttpServletResponse response = (HttpServletResponse) servletResponse;
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+            response.setHeader("Access-Control-Max-Age", "3600");
+            response.setHeader("Access-Control-Allow-Headers", "x-requested-with");
+            filterChain.doFilter(servletRequest, servletResponse);
+        };
+
     }
 }
