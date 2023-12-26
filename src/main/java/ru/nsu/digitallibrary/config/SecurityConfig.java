@@ -11,7 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.session.SessionManagementFilter;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -31,8 +30,6 @@ public class SecurityConfig {
                 .httpBasic()
                 .and()
                 .addFilterBefore(filter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(filter(), SessionManagementFilter.class)
-                .addFilter(filter())
                 .cors()
                 .and()
                 .csrf().disable()
