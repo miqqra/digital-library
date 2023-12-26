@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -26,6 +27,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .addFilterBefore(filter(), UsernamePasswordAuthenticationFilter.class)
                 .cors()
                 .and()
                 .csrf().disable()
@@ -35,20 +37,9 @@ public class SecurityConfig {
                                 .antMatchers("/admin").hasAuthority("ADMIN")
                                 .antMatchers("/api").permitAll()
                 )
-                .addFilter(filter())
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(Customizer.withDefaults());
         return http.build();
-    }
-
-    @Bean
-    public JdbcUserDetailsManager user() {
-        return new JdbcUserDetailsManager(dataSource);
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -62,5 +53,15 @@ public class SecurityConfig {
             filterChain.doFilter(servletRequest, servletResponse);
         };
 
+    }
+
+    @Bean
+    public JdbcUserDetailsManager user() {
+        return new JdbcUserDetailsManager(dataSource);
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
