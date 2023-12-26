@@ -28,6 +28,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .addFilterBefore(filter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilter(filter())
                 .cors()
                 .and()
                 .csrf().disable()
@@ -46,8 +47,8 @@ public class SecurityConfig {
     public Filter filter() {
         return (servletRequest, servletResponse, filterChain) -> {
             HttpServletResponse response = (HttpServletResponse) servletResponse;
-            response.setHeader("Access-Control-Allow-Origin", "*");
-            response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+            response.setHeader("Access-Control-Allow-Origin", "localhost:5173");
+            response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
             response.setHeader("Access-Control-Max-Age", "3600");
             response.setHeader("Access-Control-Allow-Headers", "x-requested-with");
             filterChain.doFilter(servletRequest, servletResponse);
