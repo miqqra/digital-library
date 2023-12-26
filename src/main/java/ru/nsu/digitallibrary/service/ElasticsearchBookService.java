@@ -33,6 +33,9 @@ public class ElasticsearchBookService {
     @Value("${app.words.weight.extended:1}")
     private Integer extendedWordsWeight;
 
+    @Value("${app.books.number:10}")
+    private Integer searchedBooksLimit;
+
     //private final ElasticsearchOperations elasticsearchOperations;
 
     private final ElasticsearchRestTemplate elasticsearchRestTemplate;
@@ -79,6 +82,7 @@ public class ElasticsearchBookService {
                 .get()
                 .map(SearchHit::getContent)
                 .map(BookData::getBookId)
+                .limit(searchedBooksLimit)
                 .toList();
     }
 

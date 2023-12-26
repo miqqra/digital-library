@@ -1,4 +1,6 @@
 app:
+  books:
+    number: 10
   words:
     weight:
       base: 10
