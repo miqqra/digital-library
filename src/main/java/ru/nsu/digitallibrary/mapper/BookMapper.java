@@ -35,6 +35,11 @@ public abstract class BookMapper {
     @Mapping(target = "fileName", ignore = true)
     public abstract Book toEntity(AddBookDto source);
 
+    @AfterMapping
+    protected void postMap(@MappingTarget Book target, AddBookDto source) {
+        target.setFile(new byte[]{});
+    }
+
     @Mapping(target = "id", ignore = true)
     public abstract BookData toBookData(Long bookId, String data);
 }

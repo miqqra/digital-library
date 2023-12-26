@@ -33,6 +33,9 @@ public class ElasticsearchBookService {
     @Value("${app.words.weight.extended:1}")
     private Integer extendedWordsWeight;
 
+    @Value("${app.books.number:10}")
+    private Integer searchedBooksLimit;
+
     //private final ElasticsearchOperations elasticsearchOperations;
 
     private final ElasticsearchRestTemplate elasticsearchRestTemplate;
@@ -79,6 +82,7 @@ public class ElasticsearchBookService {
                 .get()
                 .map(SearchHit::getContent)
                 .map(BookData::getBookId)
+                .limit(searchedBooksLimit)
                 .toList();
     }
 
@@ -89,11 +93,9 @@ public class ElasticsearchBookService {
             String word = entry.getKey();
             Integer weight = entry.getValue();
 
-            boolQueryBuilder.should(QueryBuilders.matchQuery("text", word).boost(weight.floatValue()));
+            boolQueryBuilder.should(QueryBuilders.matchQuery("data", word).boost(weight.floatValue()));
         }
 
-        return QueryBuilders.functionScoreQuery(boolQueryBuilder)
-                //.add(ScoreFunctionBuilders.weightFactorFunction(1))
-                ;
+        return QueryBuilders.functionScoreQuery(boolQueryBuilder);
     }
 }

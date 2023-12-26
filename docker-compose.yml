@@ -30,7 +30,7 @@ services:
     working_dir: /liquibase/changelog
 
   elasticsearch:
-    image: elasticsearch:7.17.13
+    image: elasticsearch:7.17.3
     container_name: elasticsearch
     environment:
       - discovery.type=single-node

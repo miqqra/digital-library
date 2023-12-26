@@ -5,7 +5,7 @@ import sys
 def main():
     if len(sys.argv) > 1:
         # Если передан хотя бы один аргумент из командной строки
-        input_string = sys.argv[1]
+        input_string = "5 " + sys.argv[1]
         return input_string
     else:
         return "Пожалуйста, передайте строку в качестве аргумента."
