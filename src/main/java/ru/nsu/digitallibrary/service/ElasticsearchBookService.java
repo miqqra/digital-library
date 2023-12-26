@@ -89,11 +89,9 @@ public class ElasticsearchBookService {
             String word = entry.getKey();
             Integer weight = entry.getValue();
 
-            boolQueryBuilder.should(QueryBuilders.matchQuery("text", word).boost(weight.floatValue()));
+            boolQueryBuilder.should(QueryBuilders.matchQuery("data", word).boost(weight.floatValue()));
         }
 
-        return QueryBuilders.functionScoreQuery(boolQueryBuilder)
-                //.add(ScoreFunctionBuilders.weightFactorFunction(1))
-                ;
+        return QueryBuilders.functionScoreQuery(boolQueryBuilder);
     }
 }

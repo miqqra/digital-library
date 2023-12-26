@@ -5,9 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import ru.nsu.digitallibrary.dto.book.AddBookDto;
 import ru.nsu.digitallibrary.dto.book.BookDto;
 import ru.nsu.digitallibrary.entity.postgres.Book;
@@ -16,9 +13,6 @@ import ru.nsu.digitallibrary.mapper.BookMapper;
 import ru.nsu.digitallibrary.repository.elasticsearch.BookDataElasticSearchRepository;
 import ru.nsu.digitallibrary.repository.postgres.BookRepository;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -96,11 +90,14 @@ public class BookService {
 
     @Transactional
     public void uploadFile(Long bookId, MultipartFile file) {
-        if (bookDataElasticSearchRepository.existsBookDataByBookId(bookId)) {
-            bookDataElasticSearchRepository.deleteBookDataByBookId(bookId);
-        }
+        Optional.of(bookId)
+                .map(bookDataElasticSearchRepository::findBookDataByBookId)
+                .ifPresent(bookDataElasticSearchRepository::delete);
 
         try {
+            if (file == null)
+                throw ClientException.of(HttpStatus.BAD_REQUEST, "Нет файла");
+
             bookRepository.updateBookFile(file.getBytes(), file.getOriginalFilename(), bookId);
             Optional.of(file)
                     .map(this::parseBookForElastic)
@@ -113,7 +110,13 @@ public class BookService {
 
     @Transactional
     public void deleteBook(Long id) {
-        bookRepository.deleteById(id);
+        Optional.of(id)
+                .map(bookRepository::findBookById)
+                .ifPresentOrElse(
+                        bookRepository::delete,
+                        () -> {
+                            throw ClientException.of(HttpStatus.BAD_REQUEST, "Такой книги не существует");
+                        });
         deleteBookFile(id);
     }
 
@@ -123,33 +126,10 @@ public class BookService {
     }
 
     private String parseBookForElastic(MultipartFile multipartFile) {
-        File tempFile = null;
         try {
-            tempFile = File.createTempFile("digital-lib", "tempFile");
-            tempFile.deleteOnExit();
-            multipartFile.transferTo(tempFile);
-            File xmlFile = new File("path/to/your/xml/file.xml");
-
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(xmlFile);
-
-            doc.getDocumentElement().normalize();
-
-            // Получаем корневой элемент
-            Element rootElement = doc.getDocumentElement();
-            NodeList bodyList = rootElement.getElementsByTagNameNS("http://www.gribuser.ru/xml/fictionbook/2.0", "body");
-
-            if (bodyList.getLength() > 0) {
-                return bodyList.item(0).getTextContent();
-            } else {
-                throw ClientException.of(HttpStatus.BAD_REQUEST, "Файл книги пустой");
-            }
-
+            return new String(multipartFile.getBytes());
         } catch (Exception e) {
             throw ClientException.of(HttpStatus.BAD_REQUEST, "Не удалось сохранить файл книги");
-        } finally {
-            Optional.of(tempFile).ifPresent(File::delete);
         }
     }
 }

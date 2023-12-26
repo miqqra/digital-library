@@ -7,7 +7,7 @@ import ru.nsu.digitallibrary.entity.elasticsearch.BookData;
 @Repository
 public interface BookDataElasticSearchRepository extends ElasticsearchRepository<BookData, Long> {
 
-    boolean existsBookDataByBookId(Long bookId);
+    BookData findBookDataByBookId(Long bookId);
 
     void deleteBookDataByBookId(Long bookId);
 }

@@ -23,7 +23,7 @@
         <liquibase.version>4.24.0</liquibase.version>
         <postgresql.version>42.2.18</postgresql.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
-        <elasticsearch.version>7.10.1</elasticsearch.version>
+        <elasticsearch.version>7.17.3</elasticsearch.version>
     </properties>
 
     <dependencies>
