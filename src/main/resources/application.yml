@@ -3,7 +3,7 @@ app:
     number: 10
   words:
     weight:
-      base: 10
+      base: 1000
       extended: 1
 
 spring:

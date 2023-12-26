@@ -1,6 +1,7 @@
 package ru.nsu.digitallibrary.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
@@ -25,6 +26,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ElasticsearchBookService {
 
     @Value("${app.words.weight.base:1}")
@@ -43,23 +45,35 @@ public class ElasticsearchBookService {
     @Transactional(readOnly = true)
     public List<Long> searchBook(String searchQuery) {
         try {
-            String pythonScriptPath = "C:\\Users\\User\\IdeaProjects\\digital-library\\src\\main\\resources\\script.py";
+            String pythonScriptPath = "C:\\Users\\User\\IdeaProjects\\digital-library\\src\\main\\resources\\QueryExtender\\main.py";
 
-            ProcessBuilder processBuilder = new ProcessBuilder("python", pythonScriptPath, searchQuery);
+            ProcessBuilder processBuilder = new ProcessBuilder(
+                    "C:\\Users\\User\\IdeaProjects\\digital-library\\src\\main\\resources\\QueryExtender\\venv\\Scripts\\python.exe",
+                    pythonScriptPath,
+                    searchQuery);
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String output = reader.readLine();
-            Map<String, Integer> wordsWeights = formatExtendedQuery(output);
+            Map<String, Integer> wordsWeights = formatExtendedQuery(output, searchQuery);
             return searchWithWeightedWords(wordsWeights);
         } catch (IOException e) {
             throw ClientException.of(HttpStatus.NOT_FOUND, "Не удалось произвести поиск");
         }
     }
 
-    private Map<String, Integer> formatExtendedQuery(String query) {
+    private Map<String, Integer> formatExtendedQuery(String query, String defaultQuery) {
         Map<String, Integer> wordsWeights = new HashMap<>();
-        String[] output = query.split("\\s+");
-        int meaningfulWordsNumber = Integer.parseInt(output[0]);
+
+        String[] output;
+        int meaningfulWordsNumber;
+        if (query == null) {
+            output = defaultQuery.split("\\s+");
+            meaningfulWordsNumber = output.length;
+        } else {
+            output = query.split("\\s+");
+            meaningfulWordsNumber = Integer.parseInt(output[0]);
+        }
+
         for (int i = 1; i < output.length && i <= meaningfulWordsNumber; i++) {
             wordsWeights.put(output[i], baseWordsWeight);
         }
@@ -77,6 +91,11 @@ public class ElasticsearchBookService {
                 .build();
 
         SearchHits<BookData> searchHits = elasticsearchRestTemplate.search(searchQuery, BookData.class);
+
+        searchHits.getSearchHits()
+                .stream()
+                .limit(10)
+                .peek(v -> log.info("{} scored {}", v.getContent().getBookId(), v.getScore()));
 
         return searchHits
                 .get()

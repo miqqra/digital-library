@@ -100,7 +100,7 @@ class QueryExtender:
             for entity_id in entity.ids:
                 entity.superclasses.extend(QueryExtender.get_superclasses_by_entity_id(entity_id))
                 entity.superclasses = list(set(entity.superclasses))
-        template_loader = TemplateLoader(templates_path="templates.json")
+        template_loader = TemplateLoader(templates_path="C:\\Users\\User\\IdeaProjects\\digital-library\\src\\main\\resources\\QueryExtender\\templates.json")
         results = []
         for entity in entities:
             for entity_id in entity.ids:
