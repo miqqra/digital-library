@@ -30,10 +30,6 @@ public class SecurityConfig {
         http
                 .httpBasic()
                 .and()
-                .authorizeRequests()
-                .antMatchers("/index.html",  "/api/registration", "/api/authenticate",
-                        "/api/isAuthenticated", "/api/validateCaptcha", "/console", "/api/loginRecaptchaRequired", "/api/login", "/")
-                .permitAll().anyRequest().authenticated().and()
                 .addFilterBefore(filter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(filter(), SessionManagementFilter.class)
                 .addFilter(filter())
