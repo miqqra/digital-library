@@ -1,0 +1,4 @@
+{
+  "everything":
+          "SELECT ?entity ?entityLabel\nWHERE {\n  wd:ENTITY_ID wdt:P279 ?superclass.\n  ?entity wdt:P279 ?superclass.\n  SERVICE wikibase:label { bd:serviceParam wikibase:language \"ru\". }\n}"
+}
