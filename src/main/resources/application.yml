@@ -1,6 +1,36 @@
+app:
+  books:
+    number: 10
+  words:
+    weight:
+      base: 1000
+      extended: 1
+
 spring:
+  security:
+    user:
+      #      login: user by default
+      password: test
+
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 200MB
+      max-request-size: 200MB
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  liquibase:
+    change-log: classpath:migrations/master.xml
+    contexts: schema, data
   elasticsearch:
     uris: http://localhost:9200
     socket-timeout: 10s
     username: user
     password: secret
+

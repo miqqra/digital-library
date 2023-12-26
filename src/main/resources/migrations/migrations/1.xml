@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+        logicalFilePath="migrations/migrations/1.xml">
+
+    <changeSet id="1" author="krasnikov" context="schema">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="lib_rules"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="lib_rules">
+            <column name="id" type="bigserial"
+                    remarks="Id правила"
+                    autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="category" type="text" remarks="Категория wikidata">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="query" type="text" remarks="Запрос"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="krasnikov" context="schema">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="lib_book"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="lib_book">
+            <column name="id" type="bigserial"
+                    remarks="Id книги"
+                    autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="title" type="text" remarks="Название книги">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author" type="text" remarks="Автор книги">
+                <constraints nullable="false"/>
+            </column>
+            <column name="genre" type="text" remarks="Жанр книги">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="text" remarks="Описание книги">
+                <constraints nullable="false"/>
+            </column>
+            <column name="isbn" type="text" remarks="isbn книги">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file" type="blob" remarks="Файл"/>
+            <column name="file_name" type="text" remarks="Имя файла"/>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet id="3" author="krasnikov" context="schema">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="authorities"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="authorities">
+            <column name="username" type="text"/>
+            <column name="authority" type="text"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="4" author="krasnikov" context="schema">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="users"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="users">
+            <column name="username" type="text"/>
+            <column name="password" type="text"/>
+            <column name="enabled" type="boolean"/>
+            <column name="priority" type="integer"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="5" author="krasnikov" context="data">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="users"/>
+        </preConditions>
+
+        <insert tableName="users">
+            <column name="username" value="chucha"/>
+            <column name="password"
+                    value="$2a$10$yeIfjMVthiFFjmCud2TbC.yvxvUdsZZB59rVaqAhOnC5ttxInQHaa"/> <!--chucha-->
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="6" author="krasnikov" context="data">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="authorities"/>
+        </preConditions>
+
+        <insert tableName="authorities">
+            <column name="username" value="chucha"/>
+            <column name="authority" value="ADMIN"/>
+        </insert>
+    </changeSet>
+
+
+</databaseChangeLog>
