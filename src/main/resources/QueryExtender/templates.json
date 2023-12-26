@@ -1,4 +1,7 @@
 {
-  "everything":
-          "SELECT ?entity ?entityLabel\nWHERE {\n  wd:ENTITY_ID wdt:P279 ?superclass.\n  ?entity wdt:P279 ?superclass.\n  SERVICE wikibase:label { bd:serviceParam wikibase:language \"ru\". }\n}"
+  "special case":
+          "SELECT DISTINCT ?entityLabel\nWHERE {\n  {\n    wd:ENTITY_ID wdt:P31 ?entity.\n  }\n  SERVICE wikibase:label { bd:serviceParam wikibase:language \"ru\". }\n}",
+  "common class":
+          "SELECT DISTINCT ?entityLabel\nWHERE {\n  {\n    wd:ENTITY_ID wdt:P279 ?superclass.\n    ?entity wdt:P279 ?superclass.\n  }\n  UNION\n  {\n    ?entity wdt:P279 wd:ENTITY_ID.\n  }\n  SERVICE wikibase:label { bd:serviceParam wikibase:language \"ru\". }\n}"
+
 }

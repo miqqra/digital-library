@@ -1,11 +1,14 @@
 import requests
-import json
 from Preprocessor import Preprocessor
 from classes import *
+import time
+
+
 class QueryExtender:
 
     @staticmethod
     def execute_sparql_query(query):
+        time.sleep(1)
         endpoint_url = "https://query.wikidata.org/sparql"
         params = {
             'query': query,
@@ -13,11 +16,12 @@ class QueryExtender:
         }
         response = requests.get(endpoint_url, params=params)
         if response.status_code == 200:
-            print(f"Status: {response.status_code}")
+            # print(f"Status: {response.status_code}")
             return response.json()
         else:
-            print(f"Error: {response.status_code}")
+            # print(f"Error: {response.status_code}")
             return None
+
     # Получить список id сущностей по метке
     @staticmethod
     def get_entities_by_label(label: str):
@@ -45,7 +49,7 @@ class QueryExtender:
         entity_id.id = actual_entity_id
         if 'P279' in data['entities'][actual_entity_id]['claims']:
             entity_id.has_p279 = True
-        if '31' in data['entities'][actual_entity_id]['claims']:
+        if 'P31' in data['entities'][actual_entity_id]['claims']:
             entity_id.has_p31 = True
 
         if entity_id.has_p279:
@@ -69,17 +73,23 @@ class QueryExtender:
                 s_id = entity['superclass']['value'].split('/')[-1]
                 superclasses.append(Superclass(label, s_id))
         return superclasses
-    @staticmethod
-    def get_similar_words(entity_id: str, template_loader: TemplateLoader) -> list:
-        query = template_loader.get_template(entity_id)
-        response = QueryExtender.execute_sparql_query(query)
-        if not response:
-            return []
 
     @staticmethod
     def parse_query(query: str) -> list:
         prep = Preprocessor(query)
         return prep.get_tokens()
+
+    @staticmethod
+    def get_semantically_similar_words(query: str):
+        response = QueryExtender.execute_sparql_query(query)
+        if not response:
+            return []
+        words = []
+        for word in response['results']['bindings']:
+            if 'xml:lang' in word['entityLabel']:
+                words.append(word['entityLabel']['value'])
+        return words
+
     @staticmethod
     def extend_query(query: str) -> str:
         tokens = QueryExtender.parse_query(query)
@@ -94,14 +104,8 @@ class QueryExtender:
         results = []
         for entity in entities:
             for entity_id in entity.ids:
-                pass
-        return entities
+                query = template_loader.get_template(entity_id)
+                results.extend(QueryExtender.get_semantically_similar_words(query))
 
-
-QueryExtender.extend_query("Путин собака король озеро ковбои")
-
-
-#info = QueryExtender.execute_sparql_query(query)
-
-#with open('response.json', 'w', encoding='utf-8') as json_file:
-    #json.dump(info, json_file, ensure_ascii=False, indent=4)
+        extended_query = str(len(tokens)) + ' ' + ' '.join(tokens) + ' ' + ' '.join(results)
+        return extended_query

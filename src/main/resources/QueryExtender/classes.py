@@ -35,8 +35,12 @@ class TemplateLoader:
     def __init__(self, templates_path: str):
         self.templates = json.load(open(templates_path, 'r'))
 
-    def get_template(self, entity: str) -> str:
-        template = self.templates['everything']
-        return template.replace("ENTITY_ID", entity)
+    def get_template(self, entity: EntityId) -> str:
+        template = ''
+        if entity.has_p31:
+            template = self.templates['special case']
+        if entity.has_p279:
+            template = self.templates['common class']
+        return template.replace("ENTITY_ID", entity.id)
 
 
