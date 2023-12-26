@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.session.SessionManagementFilter;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -27,8 +28,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .httpBasic()
-                .and()
                 .addFilterBefore(filter(), UsernamePasswordAuthenticationFilter.class)
                 .cors()
                 .and()
@@ -40,7 +39,8 @@ public class SecurityConfig {
                                 .antMatchers("/api", "/login").permitAll()
                 )
                 .httpBasic(Customizer.withDefaults())
-                .formLogin(Customizer.withDefaults());
+                .formLogin(Customizer.withDefaults())
+                .addFilterAfter(filter(), SessionManagementFilter.class);
         return http.build();
     }
 
