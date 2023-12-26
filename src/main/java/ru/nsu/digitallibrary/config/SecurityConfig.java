@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.session.SessionManagementFilter;
 
 import javax.servlet.DispatcherType;
@@ -40,7 +41,7 @@ public class SecurityConfig {
                 )
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(Customizer.withDefaults())
-                .addFilterAfter(filter(), SessionManagementFilter.class);
+                .addFilterAfter(filter(), SecurityContextPersistenceFilter.class);
         return http.build();
     }
 
