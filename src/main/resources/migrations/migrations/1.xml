@@ -39,23 +39,9 @@
                     autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="title" type="text" remarks="Название книги">
-                <constraints nullable="false"/>
-            </column>
-            <column name="author" type="text" remarks="Автор книги">
-                <constraints nullable="false"/>
-            </column>
-            <column name="genre" type="text" remarks="Жанр книги">
-                <constraints nullable="false"/>
-            </column>
-            <column name="description" type="text" remarks="Описание книги">
-                <constraints nullable="false"/>
-            </column>
-            <column name="isbn" type="text" remarks="isbn книги">
-                <constraints nullable="false"/>
-            </column>
             <column name="file" type="blob" remarks="Файл"/>
             <column name="file_name" type="text" remarks="Имя файла"/>
+            <column name="elastic_id" type="text" remarks="Id книги в elasticsearch"/>
         </createTable>
     </changeSet>
 

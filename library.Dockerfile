@@ -1,5 +1,5 @@
 FROM openjdk:17-alpine
 
-COPY digital-library/target/digital-library-1.0.jar /library.jar
-
-CMD ["java", "-jar", "/library.jar"]
+ARG JAR_FILE=target/*.jar
+COPY ${JAR_FILE} app.jar
+ENTRYPOINT ["java","-jar","/app.jar"]

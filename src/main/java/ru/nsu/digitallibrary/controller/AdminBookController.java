@@ -1,5 +1,6 @@
 package ru.nsu.digitallibrary.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,27 +23,32 @@ public class AdminBookController {
     private final BookService service;
 
     @PutMapping
+    @Operation(summary = "Обновить данные о книге")
     public BookDto updateBook(@RequestBody BookDto bookDto) {
         return service.updateBook(bookDto);
     }
 
     @PostMapping
+    @Operation(summary = "Добавить книгу")
     public BookDto addBook(@RequestBody AddBookDto bookDto) {
         return service.addBook(bookDto);
     }
 
     @PutMapping("/{id}/upload")
-    public void uploadFile(@PathVariable Long id, @RequestParam MultipartFile file) {
+    @Operation(summary = "Загрузить файл книги")
+    public void uploadFile(@PathVariable String id, @RequestParam MultipartFile file) {
         service.uploadFile(id, file);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBook(@PathVariable Long id) {
+    @Operation(summary = "Удалить книгу")
+    public void deleteBook(@PathVariable String id) {
         service.deleteBook(id);
     }
 
     @DeleteMapping("/{id}/file")
-    public void deleteBookFile(@PathVariable Long id) {
+    @Operation(summary = "Удалить файл книги")
+    public void deleteBookFile(@PathVariable String id) {
         service.deleteBookFile(id);
     }
 }

@@ -1,5 +1,7 @@
 package ru.nsu.digitallibrary.mapper;
 
+import java.util.List;
+import java.util.Optional;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -8,9 +10,6 @@ import ru.nsu.digitallibrary.dto.book.AddBookDto;
 import ru.nsu.digitallibrary.dto.book.BookDto;
 import ru.nsu.digitallibrary.entity.elasticsearch.BookData;
 import ru.nsu.digitallibrary.entity.postgres.Book;
-
-import java.util.List;
-import java.util.Optional;
 
 @Mapper
 public abstract class BookMapper {
@@ -26,20 +25,23 @@ public abstract class BookMapper {
                 .ifPresent(target::setFiles);
     }
 
-    @Mapping(target = "file", ignore = true)
-    @Mapping(target = "fileName", ignore = true)
-    public abstract Book toEntity(BookDto source);
+    @Mapping(target = "files", ignore = true)
+    public abstract BookDto toDto(BookData source);
+
+    @Mapping(target = "data", ignore = true)
+    public abstract BookData toEntity(BookDto source);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "file", ignore = true)
-    @Mapping(target = "fileName", ignore = true)
-    public abstract Book toEntity(AddBookDto source);
+    @Mapping(target = "data", ignore = true)
+    @Mapping(target = "score", source = "score", defaultValue = "0")
+    @Mapping(target = "votersNumber", source = "votersNumber", defaultValue = "0")
+    public abstract BookData toEntity(AddBookDto source);
 
     @AfterMapping
     protected void postMap(@MappingTarget Book target, AddBookDto source) {
         target.setFile(new byte[]{});
     }
 
-    @Mapping(target = "id", ignore = true)
-    public abstract BookData toBookData(Long bookId, String data);
+    @Mapping(target = "data", source = "data")
+    public abstract BookData toBookData(BookData bookData, String data);
 }

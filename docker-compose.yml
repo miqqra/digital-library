@@ -8,27 +8,10 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     restart: always
-
-  liquibase-migrations:
-    image: liquibase/liquibase:4.24.0
-    depends_on:
-      - postgres
-    command:
-      #      - --changeLogFile=changelog/master.xml
-      - --changeLogFile=master.xml
-      - --url=jdbc:postgresql://postgres:5432/postgres
-      - --username=postgres
-      - --password=postgres
-      - update
-    volumes:
-      - ./src/main/resources/migrations/migrations/1.xml:/liquibase/changelog/master.xml
-      - ./../../.m2/repository/org/postgresql/postgresql/42.2.18/postgresql-42.2.18.jar:/liquibase/internal/lib/postgresql-42.2.18.jar
-    working_dir: /liquibase/changelog
-
   elasticsearch:
     image: elasticsearch:7.17.3
     container_name: elasticsearch
@@ -37,6 +20,28 @@ services:
     ports:
       - "127.0.0.1:9200:9200"
       - "127.0.0.1:9300:9300"
+  kibana:
+    container_name: kibana
+    image: "kibana:7.4.0"
+    restart: always
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+  app:
+    container_name: library
+    build:
+      context: .
+      dockerfile: library.Dockerfile
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5434/postgres
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    restart: on-failure
 
 volumes:
   postgres-data:

@@ -1,18 +1,16 @@
 package ru.nsu.digitallibrary.entity.postgres;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Type;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Table;
 
 @Getter
 @Setter
@@ -28,25 +26,13 @@ public class Book {
     @Column(name = "id")
     Long id;
 
-    @Column(name = "title")
-    private String title;
-
-    @Column(name = "author")
-    private String author;
-
-    @Column(name = "genre")
-    private String genre;
-
-    @Column(name = "description")
-    private String description;
-
-    @Column(name = "isbn")
-    private String isbn;
-
     @Column(name = "file")
     @Lob
     private byte[] file;
 
     @Column(name = "file_name")
     private String fileName;
+
+    @Column(name = "elastic_id")
+    private String elasticId;
 }
