@@ -11,6 +11,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     Book findBookByElasticId(String elasticId);
 
+    boolean existsByElasticId(String elasticId);
+
     void deleteBookByElasticId(String elasticId);
 
     @Modifying

@@ -25,6 +25,7 @@
             <column name="query" type="text" remarks="Запрос"/>
         </createTable>
     </changeSet>
+<!--    //todo delete-->
 
     <changeSet id="2" author="krasnikov" context="schema">
         <preConditions onFail="MARK_RAN">

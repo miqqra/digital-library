@@ -6,4 +6,6 @@ import ru.nsu.digitallibrary.entity.elasticsearch.BookData;
 
 @Repository
 public interface BookDataElasticSearchRepository extends ElasticsearchRepository<BookData, String> {
+
+    BookData findByAuthorAndTitle(String author, String title);
 }

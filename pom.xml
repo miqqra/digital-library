@@ -50,6 +50,14 @@
         </dependency>
 
         <dependency>
+            <groupId>com.kursx.parser.fb2</groupId>
+            <artifactId>fb2</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/fb2parser.jar</systemPath>
+        </dependency>
+
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>

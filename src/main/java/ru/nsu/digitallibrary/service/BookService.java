@@ -15,6 +15,7 @@ import ru.nsu.digitallibrary.entity.elasticsearch.BookData;
 import ru.nsu.digitallibrary.entity.postgres.Book;
 import ru.nsu.digitallibrary.exception.ClientException;
 import ru.nsu.digitallibrary.mapper.BookMapper;
+import ru.nsu.digitallibrary.model.Fb2Book;
 import ru.nsu.digitallibrary.repository.elasticsearch.BookDataElasticSearchRepository;
 import ru.nsu.digitallibrary.repository.postgres.BookRepository;
 import ru.nsu.digitallibrary.service.data.ElasticsearchDataService;
@@ -66,6 +67,43 @@ public class BookService {
                 .map(bookDataElasticSearchRepository::save)
                 .map(mapper::toDto)
                 .orElseThrow(() -> ClientException.of(HttpStatus.BAD_REQUEST, "Не удалось обновить данные о книге"));
+    }
+
+    @Transactional
+    public BookDto addBook(MultipartFile file) {
+        if (file == null)
+            throw ClientException.of(HttpStatus.BAD_REQUEST, "Нет файла");
+
+        byte[] bytes;
+        String fileName;
+        try {
+            bytes = file.getBytes();
+            fileName = file.getOriginalFilename();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        Fb2Book fb2Book = new Fb2Book(file);
+
+        BookData elasticBook = Optional.of(fb2Book)
+                .map(mapper::toEntity)
+                .map(book -> Optional.of(book)
+                        .map(v -> bookDataElasticSearchRepository.findByAuthorAndTitle(v.getAuthor(), v.getTitle()))
+                        .orElseGet(() -> bookDataElasticSearchRepository.save(book))
+                )
+                .orElseThrow(() -> ClientException.of(HttpStatus.BAD_REQUEST, "Не удалось сохранить книгу"));
+
+        Optional.of(elasticBook)
+                .map(v -> mapper.toPgBook(v, bytes, fileName))
+                .filter(v -> !bookRepository.existsByElasticId(v.getElasticId()))
+                .ifPresentOrElse(bookRepository::save,
+                        () -> {
+                            throw ClientException.of(HttpStatus.BAD_REQUEST, "Книга уже существует");
+                        });
+
+        return Optional.of(elasticBook)
+                .map(mapper::toDto)
+                .orElseThrow(() -> ClientException.of(HttpStatus.BAD_REQUEST, "Не удалось сохранить книгу"));
     }
 
     @Transactional

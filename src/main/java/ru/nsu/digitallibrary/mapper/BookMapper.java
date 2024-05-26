@@ -10,12 +10,10 @@ import ru.nsu.digitallibrary.dto.book.AddBookDto;
 import ru.nsu.digitallibrary.dto.book.BookDto;
 import ru.nsu.digitallibrary.entity.elasticsearch.BookData;
 import ru.nsu.digitallibrary.entity.postgres.Book;
+import ru.nsu.digitallibrary.model.Fb2Book;
 
 @Mapper
 public abstract class BookMapper {
-
-    @Mapping(target = "files", ignore = true)
-    public abstract BookDto toDto(Book source);
 
     @AfterMapping
     protected void postMap(@MappingTarget BookDto target, Book source) {
@@ -37,6 +35,17 @@ public abstract class BookMapper {
     @Mapping(target = "votersNumber", source = "votersNumber", defaultValue = "0")
     public abstract BookData toEntity(AddBookDto source);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "title", expression = "java(source.getTitle())")
+    @Mapping(target = "author", expression = "java(source.getAuthors())")
+    @Mapping(target = "genre", expression = "java(source.getGenres())")
+    @Mapping(target = "description", ignore = true)
+    @Mapping(target = "isbn", ignore = true)
+    @Mapping(target = "data", expression = "java(source.getData())")
+    @Mapping(target = "score", constant = "0")
+    @Mapping(target = "votersNumber", constant = "0")
+    public abstract BookData toEntity(Fb2Book source);
+
     @AfterMapping
     protected void postMap(@MappingTarget Book target, AddBookDto source) {
         target.setFile(new byte[]{});
@@ -44,4 +53,8 @@ public abstract class BookMapper {
 
     @Mapping(target = "data", source = "data")
     public abstract BookData toBookData(BookData bookData, String data);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "elasticId", source = "source.id")
+    public abstract Book toPgBook(BookData source, byte[] file, String fileName);
 }
