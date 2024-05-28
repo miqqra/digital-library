@@ -16,17 +16,22 @@ services:
       - postgres-data:/var/lib/postgresql/data
     command: [ "postgres", "-c", "hba_file=/var/lib/foo/pg_hba.conf" ]
     restart: always
+    networks:
+      - app
   elasticsearch:
     image: elasticsearch:7.17.3
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
+      - cluster.name = elasticsearch
     expose:
       - 9200
       - 9300
     ports:
       - "9200:9200"
       - "9300:9300"
+    networks:
+      - app
   kibana:
     container_name: kibana
     image: "kibana:7.4.0"
@@ -34,9 +39,11 @@ services:
     environment:
       - ELASTICSEARCH_URIS=http://elasticsearch:9200
     ports:
-      - 5601:5601
+      - "5601:5601"
     depends_on:
       - elasticsearch
+    networks:
+      - app
   app:
     container_name: library
     build:
@@ -49,6 +56,12 @@ services:
     depends_on:
       - postgres
     restart: on-failure
+    networks:
+      - app
+
+networks:
+  app:
+    driver: bridge
 
 volumes:
   postgres-data:
