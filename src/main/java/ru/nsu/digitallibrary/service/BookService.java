@@ -1,6 +1,7 @@
 package ru.nsu.digitallibrary.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.nsu.digitallibrary.dto.book.AddBookDto;
 import ru.nsu.digitallibrary.dto.book.BookDto;
+import ru.nsu.digitallibrary.dto.book.BookIdsDto;
+import ru.nsu.digitallibrary.dto.book.BookTextDto;
 import ru.nsu.digitallibrary.dto.search.SearchFacetDto;
 import ru.nsu.digitallibrary.entity.elasticsearch.BookData;
 import ru.nsu.digitallibrary.entity.postgres.Book;
@@ -40,6 +43,25 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
+    public BookIdsDto getBookIds() {
+        List<String> bookIds = new ArrayList<>();
+        bookDataElasticSearchRepository.findAll().forEach(v -> bookIds.add(v.getId()));
+        return new BookIdsDto().setIds(bookIds);
+    }
+
+    @Transactional(readOnly = true)
+    public BookTextDto getBookText(String id) {
+        String text = Optional.of(id)
+                .flatMap(bookDataElasticSearchRepository::findById)
+                .map(BookData::getData)
+                .orElseThrow(() -> ClientException.of(HttpStatus.NOT_FOUND, "Не удалось найти книгу"));
+
+        return new BookTextDto()
+                .setId(id)
+                .setText(text);
+    }
+
+    @Transactional(readOnly = true)
     public byte[] downloadBook(String id) {
         return Optional.of(id)
                 .map(bookRepository::findBookByElasticId)
@@ -63,7 +85,7 @@ public class BookService {
                 .orElseThrow(() -> ClientException.of(HttpStatus.BAD_REQUEST, "Такой книги не существует"));
 
         return Optional.of(bookDto)
-                .map(mapper::toEntity)
+                .map(v -> mapper.toEntity(book, v))
                 .map(bookDataElasticSearchRepository::save)
                 .map(mapper::toDto)
                 .orElseThrow(() -> ClientException.of(HttpStatus.BAD_REQUEST, "Не удалось обновить данные о книге"));
@@ -161,8 +183,10 @@ public class BookService {
 
         Optional.of(bookData)
                 .map(v -> {
-                            Double newScore = (v.getScore() * v.getVotersNumber() + score) / (v.getVotersNumber() + 1);
-                            return v.setVotersNumber(v.getVotersNumber() + 1)
+                            Double oldScore = Optional.of(v).map(BookData::getScore).orElse(0.0);
+                            Integer oldVotersNumber = Optional.of(v).map(BookData::getVotersNumber).orElse(0);
+                            Double newScore = (oldScore * oldVotersNumber + score) / (oldVotersNumber + 1);
+                            return v.setVotersNumber(oldVotersNumber + 1)
                                     .setScore(newScore);
                         }
                 )

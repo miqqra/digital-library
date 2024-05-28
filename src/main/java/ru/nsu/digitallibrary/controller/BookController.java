@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.digitallibrary.dto.book.BookDto;
+import ru.nsu.digitallibrary.dto.book.BookIdsDto;
+import ru.nsu.digitallibrary.dto.book.BookTextDto;
 import ru.nsu.digitallibrary.dto.search.SearchFacetDto;
 import ru.nsu.digitallibrary.service.BookService;
 
@@ -35,6 +37,19 @@ public class BookController {
     public byte[] downloadBook(@PathVariable @Parameter(description = "Id книги") String id) {
         return service.downloadBook(id);
     }
+
+    @GetMapping("/id")
+    @Operation(summary = "Получить все id книг")
+    public BookIdsDto getBookIds() {
+        return service.getBookIds();
+    }
+
+    @GetMapping("/text")
+    @Operation(summary = "Получить текст книги")
+    public BookTextDto getBookText(@RequestParam String id) {
+        return service.getBookText(id);
+    }
+
 
     @GetMapping
     @Operation(summary = "Получить данные о книге")

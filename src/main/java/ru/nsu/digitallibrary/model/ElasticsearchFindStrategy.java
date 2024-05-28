@@ -3,6 +3,7 @@ package ru.nsu.digitallibrary.model;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.json.JsonData;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -15,24 +16,26 @@ import ru.nsu.digitallibrary.dto.search.SearchFacetDto;
 @RequiredArgsConstructor
 public enum ElasticsearchFindStrategy {
 
-    TITLE(searchText -> ESQuery.matchWithPrefix.getQuery().apply("book.title", searchText)),
-    AUTHOR(searchText -> ESQuery.matchWithPrefix.getQuery().apply("book.author", searchText)),
-    GENRE(searchText -> ESQuery.matchWithPrefix.getQuery().apply("book.genre", searchText)),
-    DESCRIPTION(searchText -> ESQuery.matchWithPrefix.getQuery().apply("book.description", searchText)),
-    ISBN(searchText -> ESQuery.term.getQuery().apply("book.title", searchText)),
-    DATA(searchText -> ESQuery.match.getQuery().apply("book.data", searchText)),
-    SCORE(searchText -> ESQuery.scoreFilter.getQuery().apply("book.score", searchText));
+    TITLE(searchText -> ESQuery.matchWithPrefix.getQuery().apply("title", searchText)),
+    AUTHOR(searchText -> ESQuery.matchWithPrefix.getQuery().apply("author", searchText)),
+    GENRE(searchText -> ESQuery.matchWithPrefix.getQuery().apply("genre", searchText)),
+    DESCRIPTION(searchText -> ESQuery.matchWithPrefix.getQuery().apply("description", searchText)),
+    ISBN(searchText -> ESQuery.term.getQuery().apply("isbn", searchText)),
+    DATA(searchText -> ESQuery.match.getQuery().apply("data", searchText)),
+    SCORE(searchText -> ESQuery.scoreFilter.getQuery().apply("score", searchText));
 
-    private final Function<String, Query> query;
+    private final Function<String, List<Query>> query;
 
     public static NativeQuery getQueryForStrategy(List<SearchFacetDto> facets) {
-        return NativeQuery.builder().withQuery(Query.of(q -> q.bool(b -> b.must(
+
+        return NativeQuery.builder().withQuery(Query.of(q -> q.bool(b -> b.should(
                 facets
                         .stream()
                         .map(v -> v
                                 .getStrategy()
                                 .getQuery()
                                 .apply(v.getSearchText()))
+                        .flatMap(Collection::stream)
                         .toList()
         )))).build();
     }
@@ -42,44 +45,44 @@ public enum ElasticsearchFindStrategy {
     private enum ESQuery {
 
         matchWithPrefix(
-                (fieldName, searchText) -> Query.of(q -> q.bool(b -> b.should(
-                        List.of(
-                                Query.of(q1 -> q1.matchPhrasePrefix(m -> m
-                                        .query(searchText)
-                                        .field(fieldName))),
-                                Query.of(q1 -> q1.match(m -> m
-                                        .query(searchText)
-                                        .field(fieldName)
-                                        .fuzziness("AUTO")))
-                        )
-                )))
+                (fieldName, searchText) -> List.of(
+                        Query.of(q1 -> q1.matchPhrasePrefix(m -> m
+                                .query(searchText)
+                                .field(fieldName))),
+                        Query.of(q1 -> q1.match(m -> m
+                                .query(searchText)
+                                .field(fieldName)
+                                .fuzziness("AUTO"))
+                        ))
         ),
 
         match(
-                (fieldName, searchText) -> Query.of(q -> q.match(m -> m
-                        .query(searchText)
-                        .field(fieldName)
-                        .fuzziness("AUTO"))
-                )
+                (fieldName, searchText) -> List.of(
+                        Query.of(q -> q.match(m -> m
+                                .query(searchText)
+                                .field(fieldName)
+                                .fuzziness("AUTO"))
+                        ))
         ),
 
         term(
-                (fieldName, searchText) -> Query.of(q -> q.term(t -> t
-                        .field(fieldName)
-                        .value(searchText)
-                ))
+                (fieldName, searchText) -> List.of(
+                        Query.of(q -> q.term(t -> t
+                                .field(fieldName)
+                                .value(searchText))
+                        ))
         ),
 
         scoreFilter(
-                (fieldName, searchText) -> Query.of(q -> q.range(r -> r
+                (fieldName, searchText) -> List.of(
+                        Query.of(q -> q.range(r -> r
                                 .field(fieldName)
                                 .gte(JsonData.of("0.0"))
                                 .lte(JsonData.of(searchText))
-                        )
-                )
+                        )))
         );
 
-        private final BiFunction<String, String, Query> query;
+        private final BiFunction<String, String, List<Query>> query;
 
     }
 }

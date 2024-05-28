@@ -6,13 +6,16 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import ru.nsu.digitallibrary.dto.book.AddBookDto;
 import ru.nsu.digitallibrary.dto.book.BookDto;
 import ru.nsu.digitallibrary.entity.elasticsearch.BookData;
 import ru.nsu.digitallibrary.entity.postgres.Book;
 import ru.nsu.digitallibrary.model.Fb2Book;
 
-@Mapper
+@Mapper(
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
+)
 public abstract class BookMapper {
 
     @AfterMapping
@@ -28,6 +31,8 @@ public abstract class BookMapper {
 
     @Mapping(target = "data", ignore = true)
     public abstract BookData toEntity(BookDto source);
+
+    public abstract BookData toEntity(@MappingTarget BookData target, BookDto source);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "data", ignore = true)
