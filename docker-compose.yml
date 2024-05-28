@@ -21,9 +21,12 @@ services:
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
+    expose:
+      - 9200
+      - 9300
     ports:
-      - "127.0.0.1:9200:9200"
-      - "127.0.0.1:9300:9300"
+      - "9200:9200"
+      - "9300:9300"
   kibana:
     container_name: kibana
     image: "kibana:7.4.0"
