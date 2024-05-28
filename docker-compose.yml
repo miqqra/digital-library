@@ -50,6 +50,7 @@ services:
       context: .
       dockerfile: library.Dockerfile
     environment:
+      ELASTICSEARCH_URIS: http://elasticsearch:9200
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres?sslmode=disable
     ports:
       - "8080:8080"
