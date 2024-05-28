@@ -10,7 +10,9 @@ services:
     ports:
       - "5434:5432"
     volumes:
+      - ./pg_hba.conf:/var/lib/foo/pg_hba.conf
       - postgres-data:/var/lib/postgresql/data
+    command: [ "postgres", "-c", "hba_file=/var/lib/foo/pg_hba.conf" ]
     restart: always
   elasticsearch:
     image: elasticsearch:7.17.3
@@ -36,7 +38,7 @@ services:
       context: .
       dockerfile: library.Dockerfile
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5434/postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5434/postgres?sslmode=disable
     ports:
       - "8080:8080"
     depends_on:
