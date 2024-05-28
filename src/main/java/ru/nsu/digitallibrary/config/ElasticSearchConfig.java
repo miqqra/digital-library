@@ -20,7 +20,7 @@ public class ElasticSearchConfig {
     public RestHighLevelClient client() {
 
         RestClientBuilder builder = RestClient.builder(
-                        new HttpHost("elasticsearch", 9200))
+                        new HttpHost("147.45.111.91", 9200))
                 .setRequestConfigCallback(
                         requestConfigBuilder -> requestConfigBuilder
                                 .setConnectionRequestTimeout(0));
