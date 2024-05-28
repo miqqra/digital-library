@@ -23,7 +23,7 @@ services:
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
-      - cluster.name = elasticsearch
+      - cluster.name=elasticsearch
     expose:
       - 9200
       - 9300
