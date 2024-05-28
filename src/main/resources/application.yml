@@ -23,7 +23,7 @@ spring:
       max-request-size: 200MB
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://147.45.111.91:5432/postgres
     username: postgres
     password: postgres
   jpa:
@@ -32,7 +32,7 @@ spring:
     change-log: classpath:migrations/master.xml
     contexts: schema, data
   elasticsearch:
-    uris: http://elasticsearch:9200
+    uris: http://147.45.111.91:9200
     socket-timeout: 10s
     username: user
     password: secret
