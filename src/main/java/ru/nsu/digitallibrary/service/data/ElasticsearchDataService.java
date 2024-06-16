@@ -29,7 +29,6 @@ public class ElasticsearchDataService {
     private final ElasticsearchOperations elasticsearchOperations;
 
     private final BookMapper mapper;
-    private final EnableSpringDataWebSupport.QuerydslActivator querydslActivator;
 
     public List<BookDto> findBooks(List<SearchFacetDto> facets) {
         return Optional.of(facets)
