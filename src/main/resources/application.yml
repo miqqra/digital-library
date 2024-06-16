@@ -2,6 +2,12 @@ server:
   port: 8080
 
 app:
+  scripts:
+    file:
+      python: "python.exe"
+      path: "temp.txt"
+    find: "get_books_mock.py"
+    add: "add_book_mock.py"
   books:
     number: 10
   words:

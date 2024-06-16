@@ -3,6 +3,7 @@ package ru.nsu.digitallibrary.model;
 import com.kursx.parser.fb2.FictionBook;
 import com.kursx.parser.fb2.P;
 import com.kursx.parser.fb2.Section;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
@@ -20,11 +21,14 @@ public class Fb2Book {
 
     private final FictionBook book;
 
-    public Fb2Book(MultipartFile multipart) {
+
+    public Fb2Book(MultipartFile multipart, HttpServletRequest request) {
         try {
-            File file = new File(System.getProperty("java.io.tmpdir") + "/" + multipart.getName());
-            multipart.transferTo(file);
-            book = new FictionBook(file);
+            String filePath = request.getServletContext().getRealPath("/");
+            File f1 = new File(filePath + "/" + multipart.getOriginalFilename());
+            multipart.transferTo(f1);
+
+            book = new FictionBook(f1);
         } catch (Exception e) {
             throw ClientException.of(HttpStatus.BAD_REQUEST, "Не удалось получить данные из книги");
         }

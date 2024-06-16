@@ -10,6 +10,7 @@ import java.util.function.Function;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
 import ru.nsu.digitallibrary.dto.search.SearchFacetDto;
 
 @Getter
@@ -27,17 +28,20 @@ public enum ElasticsearchFindStrategy {
     private final Function<String, List<Query>> query;
 
     public static NativeQuery getQueryForStrategy(List<SearchFacetDto> facets) {
-
         return NativeQuery.builder().withQuery(Query.of(q -> q.bool(b -> b.should(
-                facets
-                        .stream()
-                        .map(v -> v
-                                .getStrategy()
-                                .getQuery()
-                                .apply(v.getSearchText()))
-                        .flatMap(Collection::stream)
-                        .toList()
-        )))).build();
+                        facets
+                                .stream()
+                                .map(v -> v
+                                        .getStrategy()
+                                        .getQuery()
+                                        .apply(v.getSearchText()))
+                                .flatMap(Collection::stream)
+                                .toList()
+                ))))
+                .withSourceFilter(new FetchSourceFilter(
+                        new String[]{},
+                        new String[]{"data"}))
+                .build();
     }
 
     @Getter

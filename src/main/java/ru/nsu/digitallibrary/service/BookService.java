@@ -1,10 +1,17 @@
 package ru.nsu.digitallibrary.service;
 
+import jakarta.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,8 +25,8 @@ import ru.nsu.digitallibrary.entity.elasticsearch.BookData;
 import ru.nsu.digitallibrary.entity.postgres.Book;
 import ru.nsu.digitallibrary.exception.ClientException;
 import ru.nsu.digitallibrary.mapper.BookMapper;
+import ru.nsu.digitallibrary.model.ElasticsearchFindStrategy;
 import ru.nsu.digitallibrary.model.Fb2Book;
-import ru.nsu.digitallibrary.repository.elasticsearch.BookDataElasticSearchRepository;
 import ru.nsu.digitallibrary.repository.postgres.BookRepository;
 import ru.nsu.digitallibrary.service.data.ElasticsearchDataService;
 
@@ -27,32 +34,51 @@ import ru.nsu.digitallibrary.service.data.ElasticsearchDataService;
 @RequiredArgsConstructor
 public class BookService {
 
+    private final HttpServletRequest request;
+
     private final ElasticsearchDataService elasticsearchDataService;
 
     private final BookRepository bookRepository;
 
-    private final BookDataElasticSearchRepository bookDataElasticSearchRepository;
-
     private final BookMapper mapper;
+
+    @Value("${app.scripts.file.path}")
+    private String FILE_PATH;
+
+    @Value("${app.scripts.file.python}")
+    private String PYTHON_EXE;
+
+    @Value("${app.scripts.find}")
+    private String PYTHON_FIND_BOOK_SCRIPT_PATH;
+
+    @Value("${app.scripts.add}")
+    private String PYTHON_ADD_BOOK_SCRIPT_PATH;
 
     @Transactional(readOnly = true)
     public List<BookDto> searchBook(List<SearchFacetDto> facets) {
         return Optional.of(facets)
-                .map(elasticsearchDataService::findBooks)
-                .orElse(null);
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(v -> v.getStrategy().equals(ElasticsearchFindStrategy.DATA))
+                .map(facet -> findBookIdsNeuro(facet.getSearchText()))
+                .flatMap(Collection::stream)
+                .map(this::getBookData)
+                .toList();
+
+//        return Optional.of(facets)
+//                .map(elasticsearchDataService::findBooks)
+//                .orElse(null);
     }
 
     @Transactional(readOnly = true)
     public BookIdsDto getBookIds() {
-        List<String> bookIds = new ArrayList<>();
-        bookDataElasticSearchRepository.findAll().forEach(v -> bookIds.add(v.getId()));
-        return new BookIdsDto().setIds(bookIds);
+        return new BookIdsDto().setIds(elasticsearchDataService.findAllBookIds());
     }
 
     @Transactional(readOnly = true)
     public BookTextDto getBookText(String id) {
         String text = Optional.of(id)
-                .flatMap(bookDataElasticSearchRepository::findById)
+                .map(elasticsearchDataService::findById)
                 .map(BookData::getData)
                 .orElseThrow(() -> ClientException.of(HttpStatus.NOT_FOUND, "Не удалось найти книгу"));
 
@@ -72,8 +98,7 @@ public class BookService {
     @Transactional(readOnly = true)
     public BookDto getBookData(String id) {
         return Optional.of(id)
-                .flatMap(bookDataElasticSearchRepository::findById)
-                .map(mapper::toDto)
+                .map(elasticsearchDataService::findShortenedById)
                 .orElseThrow(() -> ClientException.of(HttpStatus.NOT_FOUND, "Книга не найдена"));
     }
 
@@ -81,12 +106,12 @@ public class BookService {
     public BookDto updateBook(BookDto bookDto) {
         BookData book = Optional.of(bookDto)
                 .map(BookDto::getId)
-                .flatMap(bookDataElasticSearchRepository::findById)
+                .map(elasticsearchDataService::findById)
                 .orElseThrow(() -> ClientException.of(HttpStatus.BAD_REQUEST, "Такой книги не существует"));
 
         return Optional.of(bookDto)
                 .map(v -> mapper.toEntity(book, v))
-                .map(bookDataElasticSearchRepository::save)
+                .map(elasticsearchDataService::save)
                 .map(mapper::toDto)
                 .orElseThrow(() -> ClientException.of(HttpStatus.BAD_REQUEST, "Не удалось обновить данные о книге"));
     }
@@ -105,15 +130,22 @@ public class BookService {
             throw new RuntimeException(e);
         }
 
-        Fb2Book fb2Book = new Fb2Book(file);
+        Fb2Book fb2Book = new Fb2Book(file, request);
 
         BookData elasticBook = Optional.of(fb2Book)
                 .map(mapper::toEntity)
                 .map(book -> Optional.of(book)
-                        .map(v -> bookDataElasticSearchRepository.findByAuthorAndTitle(v.getAuthor(), v.getTitle()))
-                        .orElseGet(() -> bookDataElasticSearchRepository.save(book))
+                        .map(v -> elasticsearchDataService.findByAuthorAndTitle(v.getAuthor(), v.getTitle()))
+                        .orElseGet(() -> elasticsearchDataService.save(book))
                 )
                 .orElseThrow(() -> ClientException.of(HttpStatus.BAD_REQUEST, "Не удалось сохранить книгу"));
+
+        Optional.of(elasticBook)
+                .map(bookData -> addBookNeuro(bookData))
+                .filter(v -> !v)
+                .orElseThrow(() -> ClientException.of(HttpStatus.BAD_REQUEST, """
+                        Не удалось добавить книгу в нейросеть, поиск может работать неточно. Попробуйте добавить книгу еще раз.
+                        """));
 
         Optional.of(elasticBook)
                 .map(v -> mapper.toPgBook(v, bytes, fileName))
@@ -132,7 +164,7 @@ public class BookService {
     public BookDto addBook(AddBookDto bookDto) {
         return Optional.of(bookDto)
                 .map(mapper::toEntity)
-                .map(bookDataElasticSearchRepository::save)
+                .map(elasticsearchDataService::save)
                 .map(mapper::toDto)
                 .orElseThrow(() -> ClientException.of(HttpStatus.BAD_REQUEST, "Не удалось сохранить книгу"));
     }
@@ -140,7 +172,7 @@ public class BookService {
     @Transactional
     public void uploadFile(String bookId, MultipartFile file) {
         BookData book = Optional.of(bookId)
-                .flatMap(bookDataElasticSearchRepository::findById)
+                .map(elasticsearchDataService::findById)
                 .orElseThrow(() -> ClientException.of(HttpStatus.BAD_REQUEST, "Такой книги не существует"));
 
         Optional.of(bookId)
@@ -155,7 +187,7 @@ public class BookService {
             Optional.of(file)
                     .map(this::parseBookForElastic)
                     .map(data -> mapper.toBookData(book, data))
-                    .map(bookDataElasticSearchRepository::save);
+                    .map(elasticsearchDataService::save);
         } catch (IOException e) {
             throw ClientException.of(HttpStatus.BAD_REQUEST, "Не удалось загрузить новый файл для книги");
         }
@@ -164,10 +196,10 @@ public class BookService {
     @Transactional
     public void deleteBook(String id) {
         Optional.of(id)
-                .flatMap(bookDataElasticSearchRepository::findById)
+                .map(elasticsearchDataService::findShortenedById)
                 .ifPresentOrElse(
                         book -> {
-                            bookDataElasticSearchRepository.delete(book);
+                            elasticsearchDataService.delete(book.getId());
                             bookRepository.deleteBookByElasticId(id);
                         },
                         () -> {
@@ -178,7 +210,7 @@ public class BookService {
     @Transactional
     public void rateBook(String id, Double score) {
         BookData bookData = Optional.of(id)
-                .flatMap(bookDataElasticSearchRepository::findById)
+                .map(elasticsearchDataService::findById)
                 .orElseThrow(() -> ClientException.of(HttpStatus.NOT_FOUND, "Книга не найдена"));
 
         Optional.of(bookData)
@@ -190,7 +222,7 @@ public class BookService {
                                     .setScore(newScore);
                         }
                 )
-                .map(bookDataElasticSearchRepository::save);
+                .map(elasticsearchDataService::save);
     }
 
     public void deleteBookFile(String id) {
@@ -202,6 +234,41 @@ public class BookService {
             return new String(multipartFile.getBytes());
         } catch (Exception e) {
             throw ClientException.of(HttpStatus.BAD_REQUEST, "Не удалось сохранить файл книги");
+        }
+    }
+
+    private List<String> findBookIdsNeuro(String searchQuery) {
+        try {
+
+            ProcessBuilder processBuilder = new ProcessBuilder(
+                    PYTHON_EXE,
+                    PYTHON_FIND_BOOK_SCRIPT_PATH,
+                    searchQuery);
+            Process process = null;
+            process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String output = reader.readLine();
+            return Arrays.stream(output.split(" ")).toList();
+        } catch (IOException e) {
+            return Collections.emptyList();
+        }
+    }
+
+    private boolean addBookNeuro(BookData bookData) {
+        try (PrintWriter out = new PrintWriter(FILE_PATH)) {
+            out.println(bookData.getData());
+
+            ProcessBuilder processBuilder = new ProcessBuilder(
+                    PYTHON_EXE,
+                    PYTHON_ADD_BOOK_SCRIPT_PATH,
+                    bookData.getId(),
+                    FILE_PATH);
+            Process process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String output = reader.readLine();
+            return Boolean.parseBoolean(output);
+        } catch (IOException e) {
+            return false;
         }
     }
 }

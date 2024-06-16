@@ -10,6 +10,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import ru.nsu.digitallibrary.dto.book.AddBookDto;
 import ru.nsu.digitallibrary.dto.book.BookDto;
 import ru.nsu.digitallibrary.entity.elasticsearch.BookData;
+import ru.nsu.digitallibrary.entity.elasticsearch.BookShortenedData;
 import ru.nsu.digitallibrary.entity.postgres.Book;
 import ru.nsu.digitallibrary.model.Fb2Book;
 
@@ -28,6 +29,9 @@ public abstract class BookMapper {
 
     @Mapping(target = "files", ignore = true)
     public abstract BookDto toDto(BookData source);
+
+    @Mapping(target = "files", ignore = true)
+    public abstract BookDto toDto(BookShortenedData source);
 
     @Mapping(target = "data", ignore = true)
     public abstract BookData toEntity(BookDto source);
