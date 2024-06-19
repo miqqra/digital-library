@@ -244,11 +244,13 @@ public class BookService {
                     PYTHON_EXE,
                     PYTHON_FIND_BOOK_SCRIPT_PATH,
                     searchQuery);
-            Process process = null;
-            process = processBuilder.start();
+            Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String output = reader.readLine();
-            return Arrays.stream(output.split(" ")).toList();
+            return Optional.of(output)
+                    .map(v -> v.split(" "))
+                    .map(v -> Arrays.stream(v).toList())
+                    .orElse(Collections.emptyList());
         } catch (IOException e) {
             return Collections.emptyList();
         }
