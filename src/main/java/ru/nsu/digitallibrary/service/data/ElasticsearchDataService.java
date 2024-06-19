@@ -10,12 +10,10 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.stereotype.Service;
 import ru.nsu.digitallibrary.dto.book.BookDto;
 import ru.nsu.digitallibrary.dto.search.SearchFacetDto;
 import ru.nsu.digitallibrary.entity.elasticsearch.BookData;
-import ru.nsu.digitallibrary.entity.elasticsearch.BookShortenedData;
 import ru.nsu.digitallibrary.mapper.BookMapper;
 import ru.nsu.digitallibrary.model.ElasticsearchFindStrategy;
 import ru.nsu.digitallibrary.repository.elasticsearch.BookDataElasticSearchRepository;
@@ -33,7 +31,7 @@ public class ElasticsearchDataService {
     public List<BookDto> findBooks(List<SearchFacetDto> facets) {
         return Optional.of(facets)
                 .map(ElasticsearchFindStrategy::getQueryForStrategy)
-                .map(query -> elasticsearchOperations.search(query, BookShortenedData.class))
+                .map(query -> elasticsearchOperations.search(query, BookData.class))
                 .map(SearchHits::getSearchHits)
                 .stream()
                 .flatMap(Collection::stream)
@@ -44,7 +42,7 @@ public class ElasticsearchDataService {
 
     public List<String> findAllBookIds() {
         return Optional.of(getAllBookIdsQuery())
-                .map(query -> elasticsearchOperations.search(query, String.class))
+                .map(query -> elasticsearchOperations.search(query, BookData.class))
                 .map(SearchHits::getSearchHits)
                 .stream()
                 .flatMap(Collection::stream)
@@ -54,7 +52,7 @@ public class ElasticsearchDataService {
 
     public List<BookDto> findAllShortenedBooks() {
         return Optional.of(getAllBooksQuery())
-                .map(query -> elasticsearchOperations.search(query, BookShortenedData.class))
+                .map(query -> elasticsearchOperations.search(query, BookData.class))
                 .map(SearchHits::getSearchHits)
                 .stream()
                 .flatMap(Collection::stream)
@@ -66,7 +64,7 @@ public class ElasticsearchDataService {
     public BookDto findShortenedById(String id) {
         return Optional.of(id)
                 .map(this::findByIdQuery)
-                .map(query -> elasticsearchOperations.search(query, BookShortenedData.class))
+                .map(query -> elasticsearchOperations.search(query, BookData.class))
                 .map(SearchHits::getSearchHits)
                 .stream()
                 .flatMap(Collection::stream)
