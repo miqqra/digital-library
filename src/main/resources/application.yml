@@ -19,7 +19,8 @@ spring:
   security:
     user:
       #      login: user by default
-      password: test
+      password: chucha
+      name: chucha
 
   servlet:
     multipart:

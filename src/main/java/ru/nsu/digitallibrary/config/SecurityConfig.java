@@ -23,53 +23,53 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final DataSource dataSource;
-//
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http
-//                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-//                .authorizeHttpRequests(auth -> auth
-//                                .requestMatchers(
-//                                        "/api/**",
-//                                        "/swagger-ui/**",
-//                                        "/api-docs/**"
-//                                ).permitAll()
-//                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-//                                .anyRequest().permitAll()
-//                        //.anyRequest().authenticated()
-//                )
-//                .httpBasic(Customizer.withDefaults());
-//
-//        return http.build();
-//    }
-//
-//    @Bean
-//    CorsConfigurationSource corsConfigurationSource() {
-//        final var configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(List.of("*"));
-//        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-//        configuration.setAllowedHeaders(List.of("*"));
-//        configuration.setExposedHeaders(List.of("*"));
-//
-//        final var source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration);
-//
-//        return source;
-//    }
-//
-//    @Bean
-//    public WebSecurityCustomizer webSecurityCustomizer() {
-//        return web -> {
-//        };
-//    }
-//
-//    @Bean
-//    public JdbcUserDetailsManager user() {
-//        return new JdbcUserDetailsManager(dataSource);
-//    }
-//
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .authorizeHttpRequests(auth -> auth
+                                .requestMatchers(
+                                        "/api/**",
+                                        "/swagger-ui/**",
+                                        "/api-docs/**"
+                                ).permitAll()
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                .anyRequest().permitAll()
+                        //.anyRequest().authenticated()
+                )
+                .httpBasic(Customizer.withDefaults());
+
+        return http.build();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        final var configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("*"));
+
+        final var source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> {
+        };
+    }
+
+    @Bean
+    public JdbcUserDetailsManager user() {
+        return new JdbcUserDetailsManager(dataSource);
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }
