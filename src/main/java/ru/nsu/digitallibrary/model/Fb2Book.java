@@ -1,12 +1,15 @@
 package ru.nsu.digitallibrary.model;
 
+import com.kursx.parser.fb2.Description;
 import com.kursx.parser.fb2.FictionBook;
 import com.kursx.parser.fb2.P;
 import com.kursx.parser.fb2.Section;
+import com.kursx.parser.fb2.TitleInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -64,6 +67,14 @@ public class Fb2Book {
     }
 
     public String getGenres() {
-        return String.join(" ", book.getDescription().getTitleInfo().getGenres());
+        return String.join(" ", Optional.of(book)
+                .map(FictionBook::getDescription)
+                .map(Description::getTitleInfo)
+                .map(TitleInfo::getGenres)
+                .stream()
+                .flatMap(Collection::stream)
+                .map(Genres::getValueByGenreCode)
+                .map(Genres::getName)
+                .toList());
     }
 }

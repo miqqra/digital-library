@@ -56,7 +56,7 @@ public class BookService {
 
     @Transactional(readOnly = true)
     public List<BookDto> searchBook(List<SearchFacetDto> facets) {
-        return Optional.of(facets)
+        List<BookDto> booksFromNeuro = Optional.of(facets)
                 .stream()
                 .flatMap(Collection::stream)
                 .filter(v -> v.getStrategy().equals(ElasticsearchFindStrategy.DATA))
@@ -65,9 +65,13 @@ public class BookService {
                 .map(this::getBookData)
                 .toList();
 
-//        return Optional.of(facets)
-//                .map(elasticsearchDataService::findBooks)
-//                .orElse(null);
+        List<BookDto> booksFromElastic = Optional.of(facets)
+                .map(elasticsearchDataService::findBooks)
+                .orElse(null);
+
+        //todo make merge function
+
+        return booksFromElastic;
     }
 
     @Transactional(readOnly = true)
