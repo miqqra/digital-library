@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -92,7 +93,9 @@ public class Fb2Book {
                 .map(TitleInfo::getGenres)
                 .stream()
                 .flatMap(Collection::stream)
+                .map(StringUtils::trim)
                 .map(Genres::getValueByGenreCode)
+                .filter(Objects::nonNull)
                 .map(Genres::getName)
                 .toList());
     }
