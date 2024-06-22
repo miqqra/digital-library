@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -78,7 +79,9 @@ public class Fb2Book {
                 .getTitleInfo()
                 .getAuthors()
                 .stream()
-                .map(v -> String.join(" ", v.getFirstName(), v.getMiddleName(), v.getLastName()))
+                .map(v -> List.of(v.getFirstName(), v.getMiddleName(), v.getLastName()))
+                .flatMap(Collection::stream)
+                .filter(StringUtils::isNotBlank)
                 .collect(Collectors.joining(", "));
     }
 
