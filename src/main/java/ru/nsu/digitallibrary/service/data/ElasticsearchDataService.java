@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
@@ -104,7 +105,8 @@ public class ElasticsearchDataService {
                         new String[]{"_id"},
                         new String[]{}
                 ))
-                .build();
+                .build()
+                .setPageable(Pageable.ofSize(1000));
     }
 
     private NativeQuery getAllBooksQuery() {

@@ -79,10 +79,10 @@ public class Fb2Book {
                 .getTitleInfo()
                 .getAuthors()
                 .stream()
-                .map(v -> List.of(v.getFirstName(), v.getMiddleName(), v.getLastName()))
+                .map(v -> Stream.of(v.getFirstName(), v.getMiddleName(), v.getLastName()).toList())
                 .flatMap(Collection::stream)
                 .filter(StringUtils::isNotBlank)
-                .collect(Collectors.joining(", "));
+                .collect(Collectors.joining(" "));
     }
 
     public String getGenres() {
