@@ -10,6 +10,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -63,15 +65,13 @@ public class BookService {
                 .map(facet -> findBookIdsNeuro(facet.getSearchText()))
                 .flatMap(Collection::stream)
                 .map(this::getBookData)
-                .toList();
+                .collect(Collectors.toList());
 
         List<BookDto> booksFromElastic = Optional.of(facets)
                 .map(elasticsearchDataService::findBooks)
                 .orElse(null);
 
-        //todo make merge function
-
-        return booksFromElastic;
+        return mergeResults(booksFromNeuro, booksFromElastic);
     }
 
     @Transactional(readOnly = true)
@@ -231,6 +231,16 @@ public class BookService {
 
     public void deleteBookFile(String id) {
         bookRepository.deleteBookByElasticId(id);
+    }
+
+    private List<BookDto> mergeResults(List<BookDto> booksFromNeuro, List<BookDto> booksFromElastic) {
+        Set<String> neuroResultsSet = booksFromNeuro.stream().map(BookDto::getId).collect(Collectors.toSet());
+
+        booksFromElastic.stream()
+                .filter(book -> !neuroResultsSet.contains(book.getId()))
+                .forEach(booksFromNeuro::add);
+
+        return booksFromNeuro;
     }
 
     private String parseBookForElastic(MultipartFile multipartFile) {
