@@ -33,6 +33,10 @@ public class Fb2Book {
         try {
             String filePath = request.getServletContext().getRealPath("/");
             File f1 = new File(filePath + "/" + multipart.getOriginalFilename());
+            if (f1.exists()){
+                f1.delete();
+                f1 = new File(filePath + "/" + multipart.getOriginalFilename());
+            }
             multipart.transferTo(f1);
 
             book = new FictionBook(f1);
