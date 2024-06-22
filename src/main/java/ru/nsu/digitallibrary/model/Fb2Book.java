@@ -1,5 +1,6 @@
 package ru.nsu.digitallibrary.model;
 
+import com.kursx.parser.fb2.Body;
 import com.kursx.parser.fb2.Description;
 import com.kursx.parser.fb2.FictionBook;
 import com.kursx.parser.fb2.P;
@@ -8,6 +9,7 @@ import com.kursx.parser.fb2.TitleInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,18 +40,32 @@ public class Fb2Book {
     }
 
     public List<String> getParagraphs() {
-        return book.getBody().getSections()
-                .stream()
+        return Optional.of(book)
+                .map(FictionBook::getBody)
+                .map(Body::getSections)
+                .map(this::addSections)
+                .orElse(Collections.emptyList());
+    }
+
+    private List<String> addSections(List<Section> sections) {
+        List<String> paragraphs = sections.stream()
                 .map(Section::getParagraphs)
                 .flatMap(Collection::stream)
                 .map(P::getP)
-                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toList());
+
+        List<String> innerSections = sections.stream()
+                .map(Section::getSections)
+                .map(this::addSections)
+                .flatMap(Collection::stream)
                 .toList();
+
+        paragraphs.addAll(innerSections);
+        return paragraphs;
     }
 
     public String getData() {
         return String.join(" ", getParagraphs());
-
     }
 
     public String getTitle() {

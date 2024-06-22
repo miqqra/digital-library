@@ -145,7 +145,7 @@ public class BookService {
                 .orElseThrow(() -> ClientException.of(HttpStatus.BAD_REQUEST, "Не удалось сохранить книгу"));
 
         Optional.of(elasticBook)
-                .map(bookData -> addBookNeuro(bookData))
+                .map(this::addBookNeuro)
                 .filter(v -> !v)
                 .orElseThrow(() -> ClientException.of(HttpStatus.BAD_REQUEST, """
                         Не удалось добавить книгу в нейросеть, поиск может работать неточно. Попробуйте добавить книгу еще раз.
