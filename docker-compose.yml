@@ -19,6 +19,9 @@ services:
     networks:
       - app
   elasticsearch:
+    logging:
+      options:
+        max-size: 10m
     image: elasticsearch:7.17.3
     container_name: elasticsearch
     environment:
