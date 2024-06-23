@@ -261,7 +261,7 @@ public class BookService {
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String output = reader.readLine();
-            return Optional.of(output)
+            return Optional.ofNullable(output)
                     .map(v -> v.split(" "))
                     .map(v -> Arrays.stream(v).toList())
                     .orElse(Collections.emptyList());
