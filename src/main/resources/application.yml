@@ -39,7 +39,7 @@ spring:
     change-log: classpath:migrations/master.xml
     contexts: schema, data
   elasticsearch:
-    uris: http://147.45.111.91:9200
+    uris: http://localhost:9200
     socket-timeout: 10s
     username: user
     password: secret
