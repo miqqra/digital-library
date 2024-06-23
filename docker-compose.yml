@@ -24,6 +24,7 @@ services:
     environment:
       - discovery.type=single-node
       - cluster.name=elasticsearch
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
     expose:
       - 9200
       - 9300
