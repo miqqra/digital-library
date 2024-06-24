@@ -16,6 +16,8 @@ app:
       extended: 1
 
 spring:
+  http:
+    encoding: UTF-8
   security:
     user:
       #      login: user by default
