@@ -146,7 +146,7 @@ public class BookService {
 
         Optional.of(elasticBook)
                 .map(this::addBookNeuro)
-                .filter(v -> !v)
+                .filter(v -> v)
                 .orElseThrow(() -> ClientException.of(HttpStatus.BAD_REQUEST, """
                         Не удалось добавить книгу в нейросеть, поиск может работать неточно. Попробуйте добавить книгу еще раз.
                         """));
