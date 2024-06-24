@@ -5,6 +5,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,10 +37,24 @@ public class BookController {
         return service.searchBook(facets);
     }
 
-    @GetMapping("/{id}/download")
+    @GetMapping(value = "/{id}/download",
+            produces = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Скачать книгу")
-    public byte[] downloadBook(@PathVariable @Parameter(description = "Id книги") String id) {
-        return service.downloadBook(id);
+    public ResponseEntity<Resource> downloadBook(@PathVariable @Parameter(description = "Id книги") String id) {
+        byte[] bytes = service.downloadBook(id);
+        ByteArrayResource resource = new ByteArrayResource(bytes);
+
+        HttpHeaders header = new HttpHeaders();
+        header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=book.fb2");
+        header.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        header.add("Pragma", "no-cache");
+        header.add("Expires", "0");
+
+        return ResponseEntity.ok()
+                .headers(header)
+                .contentLength(bytes.length)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
     }
 
     @GetMapping("/id")
@@ -44,7 +63,7 @@ public class BookController {
         return service.getBookIds();
     }
 
-    @GetMapping("/text")
+    @GetMapping(value = "/text")
     @Operation(summary = "Получить текст книги")
     public BookTextDto getBookText(@RequestParam String id) {
         return service.getBookText(id);
