@@ -4,10 +4,10 @@ server:
 app:
   scripts:
     file:
-      python: "python.exe"
-      path: "temp.txt"
-    find: "get_books_mock.py"
-    add: "add_book_mock.py"
+      python: "C:/ProgramData/anaconda3/python.exe"
+      path: "D:/study/digital-library-backend/temp.txt"
+    find: "D:/study/digital-library-backend/src/main/resources/get_books.py"
+    add: "D:/study/digital-library-backend/src/main/resources/add_book_to_index.py"
   books:
     number: 10
   words:
